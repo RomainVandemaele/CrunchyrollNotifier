@@ -1,0 +1,2 @@
+def parseHTML(link):
+    pass
