@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
 import requests
+import time
+import os
 
 animes = []
 day = datetime.today().weekday()
@@ -26,16 +28,36 @@ def parseHTML():
         if time.attrs != None :
             attr = time.attrs
             if 'class' in attr and attr['class'][0] == 'available-time' :
-                animes[count].append(time.text)
+                h = time.text
+                suffix = h[len(h)-2:]
+                h = h[:len(h)-2].split(':')
+                #print(h,suffix) 
+                if(suffix == "pm" and h[0]!="12") :
+                    h[0] = int(h[0])+12
+                animes[count].append(int(h[0]))
+                animes[count].append(int(h[1]))
                 date = attr['datetime'][:10].split("-") #format YYYY-MM-DD
                 day = datetime(int(date[0]),int(date[1]),int(date[2])).weekday()
                 animes[count].append(day)
-
+                animes[count].append(False)
                 count+=1
     print(count)
 
 
+def checkrelease() :
+    todayAnimes = []
+    for anime in animes :
+        if anime[4] == day :
+            todayAnimes.append(anime)
+    while True :
+        now = datetime.now()
+        for anime in todayAnimes :
+            if(anime[2] <= now.hour and anime[3] <= now.minute and anime[5] == False) :
+                os.system("notify-send " + "\"" + anime[0] + " " + str(anime[1]) + " is available since " + str(anime[2]) + ":" + str(anime[3]) + "\"")
+                anime[5] = True
+        time.sleep(5*60) 
+
+
 if __name__ == '__main__':
     parseHTML()
-    for anime in animes :
-        print(anime[0]+ " episode " + str(anime[1]) + " will be available at "+ anime[2] + " on " + dayDict[anime[3]])
+    checkrelease()
