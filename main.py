@@ -7,6 +7,7 @@ import os
 from lxml.html import fromstring
 from itertools import cycle
 import traceback
+from ip2geotools.databases.noncommercial import DbIpCity
 
 animes = []
 day = datetime.today().weekday()
@@ -80,7 +81,9 @@ def parseHTML():
                 animes[count].append(day)
                 animes[count].append(False)
                 count+=1
-    #print(count)
+    ip = proxy.split(":")[0]
+    response = DbIpCity.get(ip, api_key='free')
+    print(response.city,response.country,response.latitude,response.longitude)
     
     
 def checkrelease() :
@@ -98,6 +101,5 @@ def checkrelease() :
 
 
 if __name__ == '__main__':
-    
     parseHTML()
     #checkrelease()
