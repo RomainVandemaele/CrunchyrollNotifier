@@ -59,7 +59,6 @@ def checkrelease() :
     todayAnimes = []
     for anime in animes :
         if anime[4] == day :
-            print(anime[0] + " " + str(anime[2]) + ":" + str(anime[3]) + " day " + dayDict[anime[4]] )
             todayAnimes.append(anime)
     while True :
         now = datetime.now()
