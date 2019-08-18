@@ -4,17 +4,44 @@ import requests
 import time
 import os
 
+from lxml.html import fromstring
+from itertools import cycle
+import traceback
+
 animes = []
 day = datetime.today().weekday()
 dayDict = {0 : "Monday",1:"Tuesday",2:"Wednesday",3:"Thrusday",4:"Friday",5:"Saterday",6:"Sunday"}
 
-proxies = {
-  'http': 'http://162.252.96.65:8080', #GMT-9 9 hours less than here
-  'https': 'http://34.94.147.20:3128',
-}
+
+def get_proxies(range):
+    url = 'https://free-proxy-list.net/'
+    response = requests.get(url)
+    parser = fromstring(response.text)
+    proxies = set()
+    for i in parser.xpath('//tbody/tr')[:range]:
+        if i.xpath('.//td[7][contains(text(),"yes")]') and i.xpath('.//td[3][contains(text(),"US")]') : #and i.xpath('.//td[5][contains(text(),"elite")]') :
+            proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
+            proxies.add(proxy)
+    return proxies
 
 def parseHTML():
-    resp = requests.get("https://www.crunchyroll.com/simulcastcalendar?filter=free",proxies=proxies)
+    proxies = set()
+    range = 1000
+    while len(proxies) == 0 :
+        proxies = get_proxies(range)
+        range += 100
+    proxy = proxies.pop()
+    error = True
+    while error and len(proxies) > 0:
+        try :
+            resp = requests.get("https://www.crunchyroll.com/simulcastcalendar?filter=free",proxies={"http": 'http://' + proxy, "https": 'https://' +proxy})
+            error = False
+            print("ok")
+        except :
+            print("error")
+            proxy = proxies.pop()
+            if len(proxies) == 0 :
+                proxies = get_proxies(range)
     link = resp.text
     html = BeautifulSoup(link,'lxml')
     articles = html.find_all('article')
@@ -53,6 +80,7 @@ def parseHTML():
                 animes[count].append(day)
                 animes[count].append(False)
                 count+=1
+    #print(count)
     
     
 def checkrelease() :
@@ -70,5 +98,6 @@ def checkrelease() :
 
 
 if __name__ == '__main__':
+    
     parseHTML()
-    checkrelease()
+    #checkrelease()
