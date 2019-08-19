@@ -35,6 +35,8 @@ def parseHTML():
     while error and len(proxies) > 0:
         try :
             resp = requests.get("https://www.crunchyroll.com/simulcastcalendar?filter=free",proxies={"http": 'http://' + proxy, "https": 'https://' +proxy})
+            if "Access denied" in resp.text :
+                raise ConnectionRefusedError("Aces denied") 
             error = False
             print("ok")
         except :
@@ -52,7 +54,10 @@ def parseHTML():
             attr = article.attrs
             if "data-slug" in attr : #get article with useful information
                 animeName = attr["data-slug"].replace('-',' ')
-                epNbr = int(attr["data-episode-num"]) + 1
+                if attr["data-episode-num"].isdigit() :
+                    epNbr = int(attr["data-episode-num"]) + 1
+                else :
+                    epNbr = 0
                 animes.append([animeName,epNbr])
                 #print(animeName+ " " + str(epNbr) )
     count = 0
@@ -80,13 +85,14 @@ def parseHTML():
                 animes[count].append(day)
                 animes[count].append(False)
                 count+=1
-    #print(count)
+    print(count)
     
     
 def checkrelease() :
     todayAnimes = []
     for anime in animes :
         if anime[4] == day :
+            print(anime[0],anime[2],anime[3])
             todayAnimes.append(anime)
     while True :
         now = datetime.now()
@@ -98,6 +104,5 @@ def checkrelease() :
 
 
 if __name__ == '__main__':
-    
     parseHTML()
-    #checkrelease()
+    checkrelease()
