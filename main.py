@@ -86,13 +86,10 @@ def parseHTML():
                 animes[count].append(day)
                 animes[count].append(False)
                 count+=1
-<<<<<<< HEAD
     ip = proxy.split(":")[0]
     response = DbIpCity.get(ip, api_key='free')
     print(response.city,response.country,response.latitude,response.longitude)
-=======
     print(count)
->>>>>>> dd6f25bdc247952ee5cd74b69cc9987caccb7cfd
     
     
 def checkrelease() :
