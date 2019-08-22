@@ -91,7 +91,6 @@ def parseHTML():
     response = DbIpCity.get(ip, api_key='free')
     print(response.city,response.country,response.latitude,response.longitude)
     print(count)
-
     
     
 def checkrelease() :
