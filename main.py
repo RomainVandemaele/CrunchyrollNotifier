@@ -15,7 +15,7 @@ dayDict = {0 : "Monday",1:"Tuesday",2:"Wednesday",3:"Thrusday",4:"Friday",5:"Sat
 
 """
 Script used to parse the site Crunchyroll toget notified when a new episode is released on their US version. It was created because the site as no public API.
-It is my first project that parse html and proxies. That explain its simplicity and small scale. Notheless it was nice to do and explore a new facet of programming
+It is my first project that parse html and use proxies. That explain its simplicity and small scale. Nonetheless it was nice to do and explore a new kind of programming
 """
 
 def get_proxies(range):
@@ -101,6 +101,7 @@ def checkrelease() :
     Infinite loop checking periodically if an anime has released and send OS notification if that is the case
     """
     todayAnimes = []
+    #filter anime released today
     for anime in animes :
         if anime[4] == day :
             print(anime[0],anime[2],anime[3])
