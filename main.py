@@ -13,8 +13,15 @@ animes = []
 day = datetime.today().weekday()
 dayDict = {0 : "Monday",1:"Tuesday",2:"Wednesday",3:"Thrusday",4:"Friday",5:"Saterday",6:"Sunday"}
 
+"""
+Script used to parse the site Crunchyroll toget notified when a new episode is released on their US version. It was created because the site as no public API.
+It is my first project that parse html and proxies. That explain its simplicity and small scale. Notheless it was nice to do and explore a new facet of programming
+"""
 
 def get_proxies(range):
+    """
+    Look through US free proxy
+    """
     url = 'https://free-proxy-list.net/'
     response = requests.get(url)
     parser = fromstring(response.text)
@@ -26,6 +33,9 @@ def get_proxies(range):
     return proxies
 
 def parseHTML():
+    """
+    Obtain list of anime and release times
+    """
     proxies = set()
     range = 1000
     while len(proxies) == 0 :
@@ -33,15 +43,14 @@ def parseHTML():
         range += 100
     proxy = proxies.pop()
     error = True
+    #Go through the list of obtained proxies and test if it is not blacklisted or else try the next one
     while error and len(proxies) > 0:
         try :
             resp = requests.get("https://www.crunchyroll.com/simulcastcalendar?filter=free",proxies={"http": 'http://' + proxy, "https": 'https://' +proxy})
             if "Access denied" in resp.text :
-                raise ConnectionRefusedError("Aces denied") 
+                raise ConnectionRefusedError("Aces denied")
             error = False
-            print("ok")
         except :
-            print("error")
             proxy = proxies.pop()
             if len(proxies) == 0 :
                 proxies = get_proxies(range)
@@ -60,7 +69,6 @@ def parseHTML():
                 else :
                     epNbr = 0
                 animes.append([animeName,epNbr])
-                #print(animeName+ " " + str(epNbr) )
     count = 0
     for time in times :
         if time.attrs != None :
@@ -70,9 +78,8 @@ def parseHTML():
                 suffix = h[len(h)-2:]
                 h = h[:len(h)-2].split(':')
                 h = [int(h[0]),int(h[1])]
-                #print(h,suffix) 
                 if(suffix == "pm" and h[0]!=12) :
-                    h[0] =  int(h[0])+12 
+                    h[0] =  int(h[0])+12
                 offset = 0
                 h[0] += 9
                 if(h[0] >= 24) :
@@ -87,13 +94,12 @@ def parseHTML():
                 animes[count].append(False)
                 count+=1
 
-    ip = proxy.split(":")[0]
-    response = DbIpCity.get(ip, api_key='free')
-    print(response.city,response.country,response.latitude,response.longitude)
-    print(count)
-    
-    
+
+
 def checkrelease() :
+    """
+    Infinite loop checking periodically if an anime has released and send OS notification if that is the case
+    """
     todayAnimes = []
     for anime in animes :
         if anime[4] == day :
@@ -105,7 +111,7 @@ def checkrelease() :
             if( ( anime[2] < now.hour or  (anime[2] == now.hour and anime[3] <= now.minute ) ) and anime[5] == False) :
                 os.system("notify-send " + "\"" + anime[0] + " " + str(anime[1]) + " is available since " + str(anime[2]) + ":" + str(anime[3]) + "\"")
                 anime[5] = True
-        time.sleep(5*60) 
+        time.sleep(5*60)
 
 
 if __name__ == '__main__':
